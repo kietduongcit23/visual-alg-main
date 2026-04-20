@@ -343,7 +343,9 @@ function extractVariables(code: string) {
 
   let match;
   while ((match = varRegex.exec(code))) {
-    vars.add(match[2]);
+    if (match && match[2]) {
+      vars.add(match[2]);
+    }
   }
 
   // 🔥 2. bắt biến trong function parameter
@@ -351,7 +353,7 @@ function extractVariables(code: string) {
   let paramMatch;
 
   while ((paramMatch = paramRegex.exec(code))) {
-    const params = paramMatch[1].split(",");
+    const params = paramMatch && paramMatch[1] ? paramMatch[1].split(",") : [];
 
     params.forEach(p => {
       const name = p.trim().split(" ").pop(); // lấy từ cuối cùng
@@ -456,14 +458,14 @@ const rainbowBrackets = ViewPlugin.fromClass(class {
         const char = text[i];
         const pos = from + i;
 
-        if ("({[".includes(char)) {
+        if (char && "({[".includes(char)) {
           stack.push(char);
           const level = stack.length % colors.length;
 
           builder.add(pos, pos + 1, Decoration.mark({ class: colors[level] }));
         }
 
-        else if (")}]".includes(char)) {
+        else if (char && ")}]".includes(char)) {
           const level = stack.length % colors.length;
 
           builder.add(pos, pos + 1, Decoration.mark({ class: colors[level] }));
