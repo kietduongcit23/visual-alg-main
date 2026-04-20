@@ -92,7 +92,7 @@ const outputBox = document.getElementById('javaOutput') as HTMLElement;
 runJavaButton.addEventListener('click', async () => {
   try {
     // lấy code từ editor
-    const code = editor.state.doc.toString();
+    const code = cmView.state.doc.toString();
 
     // nhập input
     const input = prompt("Nhập input:") || "";
