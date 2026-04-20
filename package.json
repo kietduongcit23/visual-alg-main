@@ -1,0 +1,32 @@
+{
+  "name": "visualalg",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@codemirror/commands": "^6.10.0",
+    "@codemirror/lang-javascript": "^6.2.4",
+    "@codemirror/language": "^6.12.3",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.38.6",
+    "@monaco-editor/react": "^4.7.0",
+    "js-interpreter": "^6.0.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.24.0",
+    "@types/node": "^24.5.2",
+    "jsdom": "^29.0.2",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.29.1",
+    "vite": "^7.1.7",
+    "vitest": "^3.1.1"
+  }
+}

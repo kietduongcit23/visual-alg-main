@@ -1,0 +1,1 @@
+export type RunnerState = 'idle' | 'ready' | 'running' | 'paused' | 'finished' | 'error';
