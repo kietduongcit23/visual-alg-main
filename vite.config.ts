@@ -2,7 +2,7 @@ import { resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  base: '/visual-alg-main/',
+   base: '/visual-alg-main/',
   build: {
     rollupOptions: {
       input: {
