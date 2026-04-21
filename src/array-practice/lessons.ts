@@ -69,6 +69,13 @@ export function createLessons(): Lesson[] {
     if (!lesson) {
       throw new Error(`Missing lesson config for ${id}`);
     }
-    return lesson;
+    
+    // Remove leading numbers from title (e.g. "1. indexOf" -> "indexOf")
+    const cleanTitle = lesson.title.replace(/^\d+\.\s*/, '');
+    
+    return {
+      ...lesson,
+      title: cleanTitle
+    };
   });
 }

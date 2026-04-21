@@ -1,6 +1,7 @@
 export interface DomRefs {
-  lessonSelect: HTMLSelectElement;
-  lessonStats: HTMLSpanElement;
+  sidebar: HTMLElement;
+  sidebarToggle: HTMLButtonElement;
+  lessonList: HTMLElement;
   lessonDescription: HTMLParagraphElement;
   methodName: HTMLElement;
   testCount: HTMLElement;
@@ -19,12 +20,16 @@ export interface DomRefs {
   hintPanel: HTMLElement;
   hintBody: HTMLElement;
   themeToggle: HTMLButtonElement;
+  activeLessonLabel: HTMLSpanElement;
+  badgeGroup: HTMLDivElement;
+  progressBarContainer: HTMLDivElement;
 }
 
 export interface PersistedState {
   lessonId?: string;
   draftByLesson?: Record<string, string>;
   resultsByLesson?: Record<string, 'accepted' | 'failed' | 'partial'>;
+  completedLessons?: string[];
 }
 
 export interface RawTestCase {

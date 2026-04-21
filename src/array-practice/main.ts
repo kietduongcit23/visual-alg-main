@@ -1,8 +1,13 @@
 import '../styles/reset.css';
 import '../styles/array-practice.css';
 
-import type { EditorView } from '@codemirror/view';
-import { createCodeMirrorEditor, setEditorValue, getEditorValue } from './codemirror-editor';
+import { 
+  createMonacoEditor, 
+  setMonacoValue, 
+  getMonacoValue, 
+  updateMonacoTheme,
+  setMonacoReadOnly
+} from './monaco-editor';
 import { createLessons } from './lessons';
 import { deepEqual } from './comparison';
 import {
@@ -34,23 +39,27 @@ const lessonMap = new Map(lessons.map((lesson) => [lesson.id, lesson]));
 const persisted = loadPersistedState(STORAGE_KEY);
 const draftByLesson: Record<string, string> = persisted.draftByLesson || {};
 const resultsByLesson: Record<string, 'accepted' | 'failed' | 'partial'> = persisted.resultsByLesson || {};
+const completedLessons: string[] = persisted.completedLessons || [];
 let selectedLessonId = lessonMap.has(persisted.lessonId || '') ? persisted.lessonId || lessons[0]!.id : lessons[0]!.id;
 let isRunning = false;
 
-// ─── CodeMirror setup ────────────────────────────────────────────────────────
+// ─── Monaco setup ────────────────────────────────────────────────────────────
 
 const initialLesson = lessonMap.get(selectedLessonId)!;
 const initialCode = draftByLesson[selectedLessonId] || initialLesson.starterCode;
 
-// Đã đổi let thành const để fix ESLint
-const cmView: EditorView = createCodeMirrorEditor(
+// Initialize Monaco asynchronously
+void createMonacoEditor(
   dom.editorHost,
   initialCode,
   (newValue) => {
     draftByLesson[selectedLessonId] = newValue;
     persistState();
   },
-);
+).then(() => {
+  // Any post-init logic if needed
+  syncLessonView();
+});
 
 // ─── Theme Setup ─────────────────────────────────────────────────────────────
 
@@ -72,6 +81,23 @@ renderLessonStats();
 syncLessonView();
 renderIdleSummary();
 
+// ─── Sidebar Toggle ─────────────────────────────────────────────────────────
+
+dom.sidebarToggle.addEventListener('click', () => {
+  if (window.innerWidth <= 768) {
+    dom.sidebar.classList.toggle('is-mobile-open');
+  } else {
+    dom.sidebar.classList.toggle('is-collapsed');
+    const isCollapsed = dom.sidebar.classList.contains('is-collapsed');
+    localStorage.setItem('sidebar-collapsed', isCollapsed ? 'true' : 'false');
+  }
+});
+
+// Restore sidebar state
+if (localStorage.getItem('sidebar-collapsed') === 'true') {
+  dom.sidebar.classList.add('is-collapsed');
+}
+
 // ─── Event listeners ─────────────────────────────────────────────────────────
 
 dom.themeToggle.addEventListener('click', () => {
@@ -80,26 +106,19 @@ dom.themeToggle.addEventListener('click', () => {
   document.documentElement.dataset.theme = newTheme;
   localStorage.setItem('theme', newTheme);
   updateThemeIcon();
-});
-
-dom.lessonSelect.addEventListener('change', () => {
-  persistCurrentDraft();
-  selectedLessonId = dom.lessonSelect.value;
-  syncLessonView();
-  persistState();
-  clearResults();
+  updateMonacoTheme(newTheme);
 });
 
 dom.resetButton.addEventListener('click', () => {
   const lesson = getSelectedLesson();
-  setEditorValue(cmView, lesson.starterCode);
+  setMonacoValue(lesson.starterCode);
   draftByLesson[selectedLessonId] = lesson.starterCode;
   persistState();
 });
 
 dom.solutionButton.addEventListener('click', () => {
   const lesson = getSelectedLesson();
-  setEditorValue(cmView, lesson.solutionCode);
+  setMonacoValue(lesson.solutionCode);
   draftByLesson[selectedLessonId] = lesson.solutionCode;
   persistState();
 });
@@ -107,35 +126,7 @@ dom.solutionButton.addEventListener('click', () => {
 dom.runButton.addEventListener('click', () => {
   void runSelectedLesson();
 });
-const runJavaButton = document.getElementById('runJavaButton') as HTMLButtonElement;
-const outputBox = document.getElementById('javaOutput') as HTMLElement;
 
-runJavaButton.addEventListener('click', async () => {
-  try {
-    // lấy code từ editor
-    const code = cmView.state.doc.toString();
-
-    // nhập input
-    const input = prompt("Nhập input:") || "";
-
-    // gọi backend
-    const res = await fetch("http://localhost:3001/run", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ code, input }),
-    });
-
-    const data = await res.json();
-
-    // hiển thị output
-    outputBox.textContent = data.output || data.error;
-
-  } catch (err) {
-    outputBox.textContent = "Lỗi kết nối backend!";
-  }
-});
 window.addEventListener('keydown', (event) => {
   if (event.key === 'Enter' && event.ctrlKey) {
     event.preventDefault();
@@ -156,7 +147,7 @@ function getSelectedLesson(): Lesson {
 }
 
 function persistCurrentDraft(): void {
-  draftByLesson[selectedLessonId] = getEditorValue(cmView);
+  draftByLesson[selectedLessonId] = getMonacoValue();
 }
 
 function persistState(): void {
@@ -164,21 +155,53 @@ function persistState(): void {
     lessonId: selectedLessonId,
     draftByLesson,
     resultsByLesson,
+    completedLessons,
   });
 }
 
 function renderLessonOptions(): void {
-  dom.lessonSelect.replaceChildren(
-    ...lessons.map((lesson) => {
-      const option = document.createElement('option');
-      option.value = lesson.id;
-      const status = resultsByLesson[lesson.id];
-      const icon = status === 'accepted' ? '✅ ' : (status === 'failed' || status === 'partial' ? '❌ ' : '');
-      option.textContent = icon + lesson.title;
-      return option;
+  dom.lessonList.replaceChildren(
+    ...lessons.map((lesson, index) => {
+      const button = document.createElement('button');
+      button.className = 'sidebar-lesson-item';
+      if (lesson.id === selectedLessonId) {
+        button.classList.add('is-active');
+      }
+      if (completedLessons.includes(lesson.id)) {
+        button.classList.add('completed');
+      }
+
+      const displayIndex = String(index + 1).padStart(2, '0');
+      const formattedTitle = formatTitle(lesson.title);
+      const isCompleted = completedLessons.includes(lesson.id);
+
+      button.innerHTML = `
+        <span class="index">${displayIndex}</span>
+        <span class="title">${isCompleted ? '<i class="check-icon">✔</i> ' : ''}${formattedTitle}</span>
+      `;
+
+      button.addEventListener('click', () => {
+        if (selectedLessonId === lesson.id) {
+          if (window.innerWidth <= 768) {
+            dom.sidebar.classList.remove('is-mobile-open');
+          }
+          return;
+        }
+        persistCurrentDraft();
+        selectedLessonId = lesson.id;
+        syncLessonView();
+        persistState();
+        clearResults();
+        renderLessonOptions(); // Refresh active state
+
+        if (window.innerWidth <= 768) {
+          dom.sidebar.classList.remove('is-mobile-open');
+        }
+      });
+
+      return button;
     }),
   );
-  dom.lessonSelect.value = selectedLessonId;
 }
 
 function renderLessonStats(): void {
@@ -188,21 +211,44 @@ function renderLessonStats(): void {
     if (status === 'accepted') passedCount += 1;
     if (status === 'failed' || status === 'partial') failedCount += 1;
   }
-  if (passedCount > 0 || failedCount > 0) {
-    dom.lessonStats.textContent = `(✅ ${passedCount} | ❌ ${failedCount})`;
-  } else {
-    dom.lessonStats.textContent = '';
+
+  if (passedCount === 0 && failedCount === 0) {
+    dom.badgeGroup.innerHTML = '';
+    dom.progressBarContainer.innerHTML = '';
+    return;
   }
+
+  const total = lessons.length;
+  const percentage = (passedCount / total) * 100;
+  const isAllPassed = passedCount === total;
+
+  // Render Badges
+  dom.badgeGroup.innerHTML = isAllPassed 
+    ? `<div class="stats-badge passed all-passed"><i>✔</i> All Lessons Passed</div>`
+    : `
+      <div class="stats-badge passed"><i>✔</i> ${passedCount} Passed</div>
+      ${failedCount > 0 ? `<div class="stats-badge failed"><i>✖</i> ${failedCount} Failed</div>` : ''}
+    `;
+
+  // Render Progress Bar
+  dom.progressBarContainer.innerHTML = `
+    <div class="stats-progress-container">
+      <div class="stats-progress-bar" style="width: ${percentage}%"></div>
+    </div>
+    <span class="stats-progress-text">${passedCount} / ${total}</span>
+  `;
 }
 
 function syncLessonView(): void {
   const lesson = getSelectedLesson();
-  dom.lessonSelect.value = lesson.id;
+  const formattedTitle = formatTitle(lesson.title);
+  
   dom.lessonDescription.textContent = lesson.description;
   dom.methodName.textContent = lesson.methodName;
   dom.testCount.textContent = `${lesson.testCount} total / ${lesson.visibleTestCount} shown`;
+  dom.activeLessonLabel.textContent = `👉 ${formattedTitle}`;
 
-  setEditorValue(cmView, draftByLesson[lesson.id] || lesson.starterCode);
+  setMonacoValue(draftByLesson[lesson.id] || lesson.starterCode);
 
   if (lesson.hints && lesson.hints.length > 0) {
     dom.hintPanel.style.display = 'block';
@@ -218,6 +264,14 @@ function syncLessonView(): void {
   }
 
   renderSampleCase(lesson);
+}
+
+function formatTitle(title: string): string {
+  return title
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .split(/[\s_-]+/)
+    .map(word => word.replace(/^(\(?)(\w)/, (_, p1, p2) => p1 + p2.toUpperCase()))
+    .join(' ');
 }
 
 function renderSampleCase(lesson: Lesson): void {
@@ -247,7 +301,7 @@ function renderIdleSummary(): void {
 
 async function runSelectedLesson(): Promise<void> {
   const lesson = getSelectedLesson();
-  const rawSource = getEditorValue(cmView).trim();
+  const rawSource = getMonacoValue().trim();
 
   const source = convertJavaToJS(rawSource);
 
@@ -352,6 +406,9 @@ async function runSelectedLesson(): Promise<void> {
     });
 
     resultsByLesson[lesson.id] = newBadge;
+    if (newBadge === 'accepted' && !completedLessons.includes(lesson.id)) {
+      completedLessons.push(lesson.id);
+    }
     persistState();
     renderLessonOptions();
     renderLessonStats();
@@ -378,10 +435,8 @@ function setRunning(nextRunning: boolean): void {
   dom.runButton.disabled = nextRunning;
   dom.solutionButton.disabled = nextRunning;
   dom.resetButton.disabled = nextRunning;
-  dom.lessonSelect.disabled = nextRunning;
-
-  cmView.contentDOM.contentEditable = nextRunning ? 'false' : 'true';
-
+  setMonacoReadOnly(nextRunning);
+  
   if (nextRunning) {
     dom.summaryBadge.className = 'badge idle';
     dom.summaryBadge.textContent = 'Running';
@@ -392,7 +447,11 @@ function setRunning(nextRunning: boolean): void {
 function renderSummary(summary: SummaryState): void {
   dom.summaryBadge.className = `badge ${summary.badge}`;
   dom.summaryBadge.textContent = summary.badge.charAt(0).toUpperCase() + summary.badge.slice(1);
-  dom.summaryMessage.textContent = summary.message;
+  
+  // Highlight the pass ratio in the message
+  const ratioText = `${summary.passed} / ${summary.total} tests passed`;
+  dom.summaryMessage.innerHTML = `<strong>${ratioText}</strong> — ${summary.message}`;
+  
   dom.summaryTotal.textContent = String(summary.total);
   dom.summaryPassed.textContent = String(summary.passed);
   dom.summaryFailed.textContent = String(summary.failed);
@@ -403,14 +462,26 @@ function renderRows(rows: ResultRow[]): void {
   dom.resultsBody.replaceChildren(
     ...rows.map((row) => {
       const tr = document.createElement('tr');
+      if (row.isVisible === false) {
+        tr.classList.add('hidden-test');
+      }
+
+      // Status Badge Cell
+      const statusTd = document.createElement('td');
+      const isPass = row.status === 'passed';
+      const badge = document.createElement('span');
+      badge.className = `status-badge ${isPass ? 'pass' : 'fail'}`;
+      badge.innerHTML = `<i>${isPass ? '✔' : '✖'}</i> ${isPass ? 'PASS' : 'FAIL'}`;
+      statusTd.appendChild(badge);
+
       tr.append(
         createCell(String(row.index)),
-        createCell(row.status === 'passed' ? 'PASS' : 'FAIL', row.status === 'passed' ? 'status-pass' : 'status-fail'),
-        createCell(row.args, 'mono'),
-        createCell(row.expected, 'mono'),
-        createCell(row.actual, 'mono'),
-        createCell(row.note),
-        createCell(row.message),
+        statusTd,
+        createCell(row.args, 'mono-cell'),
+        createCell(row.expected, 'expected-cell'),
+        createCell(row.actual, 'actual-cell'),
+        createCell(row.isVisible === false ? `🔒 ${row.note}` : row.note, 'note-cell'),
+        createCell(row.message, 'message-cell'),
       );
       return tr;
     }),
@@ -436,8 +507,10 @@ function createCell(text: string, className?: string): HTMLTableCellElement {
   for (const lesson of lessons) {
     console.log(`Testing lesson: ${lesson.title}`);
 
-    dom.lessonSelect.value = lesson.id;
-    dom.lessonSelect.dispatchEvent(new Event('change'));
+    selectedLessonId = lesson.id;
+    syncLessonView();
+    clearResults();
+    renderLessonOptions();
 
     await new Promise((r) => setTimeout(r, 500));
 
