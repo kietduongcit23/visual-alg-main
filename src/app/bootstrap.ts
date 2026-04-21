@@ -12,6 +12,9 @@ import { formatValidationIssues } from '../ui/validation-summary';
 import { renderArrayPanel } from '../visual/array-renderer';
 import { renderVariablesPanel } from '../visual/variable-renderer';
 
+const isLight = localStorage.getItem('theme') === 'light';
+if (isLight) document.documentElement.dataset.theme = 'light';
+
 export function bootstrap(container: HTMLDivElement | null): void {
   if (!container) {
     throw new Error('Missing #app root container.');

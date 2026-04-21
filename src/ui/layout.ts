@@ -52,8 +52,6 @@ export function createLayout(options: LayoutOptions): LayoutRefs {
   });
   const welcome = createWelcomePanel();
 
-  header.append(heading, status);
-
   const code = createCodePanel();
   const array = createArrayPanel({
     onReset: options.onReset,
@@ -65,6 +63,23 @@ export function createLayout(options: LayoutOptions): LayoutRefs {
   const log = createLogPanel();
   const explanation = createExplanationPanel();
 
+  const themeToggle = document.createElement('button');
+  themeToggle.className = 'icon-button theme-toggle';
+  themeToggle.innerHTML = `<span class="icon-button-glyph">🌓</span>`;
+  themeToggle.title = 'Toggle Theme';
+  themeToggle.onclick = () => {
+    const isLight = document.documentElement.dataset.theme === 'light';
+    const newTheme = isLight ? 'dark' : 'light';
+    document.documentElement.dataset.theme = newTheme;
+    localStorage.setItem('theme', newTheme);
+  };
+
+  const headerRight = document.createElement('div');
+  headerRight.className = 'header-right';
+  headerRight.append(themeToggle, array.footer);
+
+  header.append(heading, status, headerRight);
+
   const appBody = document.createElement('div');
   appBody.className = 'app-body';
 
@@ -73,14 +88,40 @@ export function createLayout(options: LayoutOptions): LayoutRefs {
 
   const leftCol = document.createElement('div');
   leftCol.className = 'left-col';
+  leftCol.style.flex = '6';
+
+  const resizer = document.createElement('div');
+  resizer.className = 'resizer';
+
+  let isResizing = false;
+  resizer.addEventListener('mousedown', () => {
+    isResizing = true;
+    document.body.style.cursor = 'col-resize';
+  });
+  document.addEventListener('mousemove', (e) => {
+    if (!isResizing) return;
+    const containerWidth = mainContent.getBoundingClientRect().width;
+    const leftWidth = e.clientX - mainContent.getBoundingClientRect().left - 24; // account for padding
+    const ratio = leftWidth / containerWidth;
+    if (ratio > 0.2 && ratio < 0.8) {
+      leftCol.style.flex = `${ratio * 10}`;
+      rightCol.style.flex = `${(1 - ratio) * 10}`;
+    }
+  });
+  document.addEventListener('mouseup', () => {
+    if (isResizing) {
+      isResizing = false;
+      document.body.style.cursor = '';
+    }
+  });
 
   const rightCol = document.createElement('div');
   rightCol.className = 'right-col';
+  rightCol.style.flex = '4';
 
-  code.root.append(array.footer);
   leftCol.append(explanation.root, code.root);
   rightCol.append(array.root, log.root);
-  mainContent.append(leftCol, rightCol);
+  mainContent.append(leftCol, resizer, rightCol);
 
   appBody.append(toolbar.root, mainContent);
 
