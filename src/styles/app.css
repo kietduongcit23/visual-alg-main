@@ -15,20 +15,24 @@
 }
 
 body {
-  min-height: 100vh;
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
   background: var(--bg);
   color: var(--ink);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 #app {
-  width: min(1400px, calc(100vw - 32px));
-  margin: 24px auto;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
 }
 
 .app-shell {
-  display: grid;
-  gap: 18px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
 .app-header,
@@ -43,8 +47,11 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 18px;
-  padding: 16px 24px;
+  padding: 12px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  z-index: 10;
 }
 
 .status-banner {
@@ -88,9 +95,17 @@ body {
   font-weight: 700;
 }
 
-.app-heading h1,
+.app-heading h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
 .panel-header h2 {
   margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
 }
 
 .eyebrow {
@@ -108,75 +123,107 @@ body {
   color: var(--muted);
 }
 
-.toolbar {
-  display: grid;
-  grid-template-columns: minmax(260px, 340px);
-  gap: 12px;
-}
-
-.toolbar-minimal {
-  justify-content: start;
-}
-
-.toolbar-group {
-  display: grid;
-  gap: 8px;
-}
-
-.toolbar-group span {
-  color: var(--muted);
-  font-size: 0.88rem;
-  font-weight: 600;
-}
-
-.toolbar select,
-.toolbar input,
-.toolbar button {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg);
-  color: var(--ink);
-  min-height: 40px;
-  padding: 0 14px;
-  cursor: pointer;
-  outline: none;
-  transition: border-color 150ms ease, background 150ms ease;
-}
-
-.toolbar select:hover,
-.toolbar input:hover,
-.toolbar button:hover,
-.toolbar select:focus {
-  border-color: var(--accent);
-}
-
-.toolbar-controls {
+.app-body {
   display: flex;
-  align-items: end;
-  gap: 10px;
-}
-
-.toolbar-controls button {
   flex: 1;
+  overflow: hidden;
+  background: var(--bg);
 }
 
-.main-layout {
+.sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  background: var(--surface-strong);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-title {
+  padding: 16px 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid var(--border);
+}
+
+.lesson-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lesson-item {
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.lesson-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.lesson-item.is-active {
+  background: var(--accent-soft);
+  color: #fff;
+  font-weight: 600;
+  position: relative;
+}
+
+.lesson-item.is-active::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 10%;
+  bottom: 10%;
+  width: 4px;
+  background: var(--accent);
+  border-radius: 0 4px 4px 0;
+}
+
+.main-content {
+  flex: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 18px;
-  align-items: start;
+  gap: 24px;
+  padding: 24px;
+  overflow-y: auto;
 }
 
 .left-col,
 .right-col {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 24px;
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .panel {
-  padding: 18px;
+  padding: 24px;
+  animation: slide-up 0.4s ease-out backwards;
 }
+
+.left-col .panel:nth-child(1) { animation-delay: 0.05s; }
+.left-col .panel:nth-child(2) { animation-delay: 0.15s; }
+.right-col .panel:nth-child(1) { animation-delay: 0.10s; }
+.right-col .panel:nth-child(2) { animation-delay: 0.20s; }
 
 .panel-header {
   display: flex;
@@ -194,9 +241,9 @@ body {
 
 .mode-toggle {
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: 8px;
   min-height: 34px;
-  padding: 0 12px;
+  padding: 0 14px;
   background: var(--surface-strong);
   color: var(--ink);
   font-size: 0.85rem;
@@ -562,6 +609,8 @@ body {
   border-color: var(--accent);
   width: auto;
   padding: 0 16px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
 }
 
 .icon-button[title="Run"] .icon-button-glyph {

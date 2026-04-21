@@ -52,7 +52,7 @@ export function createLayout(options: LayoutOptions): LayoutRefs {
   });
   const welcome = createWelcomePanel();
 
-  header.append(heading, toolbar.root, status);
+  header.append(heading, status);
 
   const code = createCodePanel();
   const array = createArrayPanel({
@@ -65,23 +65,25 @@ export function createLayout(options: LayoutOptions): LayoutRefs {
   const log = createLogPanel();
   const explanation = createExplanationPanel();
 
-  const mainLayout = document.createElement('div');
-  mainLayout.className = 'main-layout';
+  const appBody = document.createElement('div');
+  appBody.className = 'app-body';
+
+  const mainContent = document.createElement('section');
+  mainContent.className = 'main-content';
 
   const leftCol = document.createElement('div');
   leftCol.className = 'left-col';
-  // leftCol.append(code.root, array.footer); // Wait, array.footer is not exported yet.
 
   const rightCol = document.createElement('div');
   rightCol.className = 'right-col';
-  // rightCol.append(explanation.root, array.root, log.root);
 
-  // We will append properly once we export array.footer in the next step.
   code.root.append(array.footer);
-  leftCol.append(code.root);
-  rightCol.append(explanation.root, array.root, log.root);
-  mainLayout.append(leftCol, rightCol);
+  leftCol.append(explanation.root, code.root);
+  rightCol.append(array.root, log.root);
+  mainContent.append(leftCol, rightCol);
 
-  shell.append(header, welcome.root, mainLayout);
+  appBody.append(toolbar.root, mainContent);
+
+  shell.append(header, welcome.root, appBody);
   return { root: shell, toolbar, welcome, code, array, log, explanation, status };
 }

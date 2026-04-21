@@ -229,7 +229,7 @@ export function bootstrap(container: HTMLDivElement | null): void {
   function render(): void {
     const hasValidationErrors = validationMessages.length > 0;
 
-    layout.toolbar.lessonSelect.value = selectedLesson.id;
+    layout.toolbar.setActiveLesson(selectedLesson.id);
     layout.welcome.root.hidden = !isWelcomeVisible;
     layout.array.speedInput.value = String(state.speed);
     layout.array.resetButton.disabled = false;

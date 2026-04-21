@@ -7,36 +7,51 @@ interface ToolbarOptions {
 
 export interface ToolbarRefs {
   root: HTMLElement;
-  lessonSelect: HTMLSelectElement;
+  setActiveLesson: (id: string) => void;
 }
 
 export function createToolbar(options: ToolbarOptions): ToolbarRefs {
-  const toolbar = document.createElement('div');
-  toolbar.className = 'toolbar toolbar-minimal';
+  const sidebar = document.createElement('aside');
+  sidebar.className = 'sidebar';
 
-  const selector = document.createElement('label');
-  selector.className = 'toolbar-group';
+  const title = document.createElement('div');
+  title.className = 'sidebar-title';
+  title.textContent = 'Lessons';
 
-  const label = document.createElement('span');
-  label.textContent = 'Lesson';
+  const list = document.createElement('ul');
+  list.className = 'lesson-list';
+  list.setAttribute('aria-label', 'Lesson selector');
 
-  const lessonSelect = document.createElement('select');
-  lessonSelect.setAttribute('aria-label', 'Lesson selector');
+  const buttons: Record<string, HTMLButtonElement> = {};
+
   for (const lesson of options.lessons) {
-    const option = document.createElement('option');
-    option.value = lesson.id;
-    option.textContent = lesson.title;
-    lessonSelect.append(option);
-  }
-  lessonSelect.addEventListener('change', () => {
-    options.onLessonChange(lessonSelect.value);
-  });
-  selector.append(label, lessonSelect);
+    const li = document.createElement('li');
+    const button = document.createElement('button');
+    button.className = 'lesson-item';
+    button.textContent = lesson.title;
+    button.setAttribute('data-id', lesson.id);
 
-  toolbar.append(selector);
+    button.addEventListener('click', () => {
+      options.onLessonChange(lesson.id);
+    });
+
+    li.append(button);
+    list.append(li);
+    buttons[lesson.id] = button;
+  }
+
+  sidebar.append(title, list);
+
+  const setActiveLesson = (id: string) => {
+    Object.values(buttons).forEach(btn => btn.classList.remove('is-active'));
+    if (buttons[id]) {
+      buttons[id].classList.add('is-active');
+      buttons[id].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  };
 
   return {
-    root: toolbar,
-    lessonSelect,
+    root: sidebar,
+    setActiveLesson,
   };
 }
