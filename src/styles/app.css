@@ -1,27 +1,24 @@
 :root {
-  color-scheme: light;
-  --bg: #f4efe6;
-  --surface: rgba(255, 251, 245, 0.82);
-  --surface-strong: #fffaf1;
-  --ink: #132238;
-  --muted: #5c6a7a;
-  --accent: #e16b2d;
-  --accent-soft: rgba(225, 107, 45, 0.16);
-  --teal: #0d7d7d;
-  --teal-soft: rgba(13, 125, 125, 0.16);
-  --line-active: rgba(255, 192, 103, 0.26);
-  --shadow: 0 24px 60px rgba(49, 38, 23, 0.12);
-  --border: rgba(19, 34, 56, 0.1);
+  color-scheme: dark;
+  --bg: #1e1e1e;
+  --surface: #252526;
+  --surface-strong: #2d2d30;
+  --ink: #cccccc;
+  --muted: #858585;
+  --accent: #007acc;
+  --accent-soft: rgba(0, 122, 204, 0.16);
+  --teal: #4ec9b0;
+  --teal-soft: rgba(78, 201, 176, 0.16);
+  --line-active: rgba(255, 255, 255, 0.05);
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --border: #3e3e42;
 }
 
 body {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(225, 107, 45, 0.18), transparent 30%),
-    radial-gradient(circle at top right, rgba(13, 125, 125, 0.15), transparent 28%),
-    linear-gradient(180deg, #f8f1e5 0%, #efe5d5 100%);
+  background: var(--bg);
   color: var(--ink);
-  font-family: 'Segoe UI', 'Trebuchet MS', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 #app {
@@ -37,16 +34,17 @@ body {
 .app-header,
 .panel {
   border: 1px solid var(--border);
-  border-radius: 24px;
+  border-radius: 12px;
   background: var(--surface);
-  backdrop-filter: blur(12px);
   box-shadow: var(--shadow);
 }
 
 .app-header {
-  display: grid;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 18px;
-  padding: 24px;
+  padding: 16px 24px;
 }
 
 .status-banner {
@@ -135,10 +133,21 @@ body {
 .toolbar input,
 .toolbar button {
   border: 1px solid var(--border);
-  border-radius: 14px;
-  background: var(--surface-strong);
-  min-height: 44px;
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 40px;
   padding: 0 14px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.toolbar select:hover,
+.toolbar input:hover,
+.toolbar button:hover,
+.toolbar select:focus {
+  border-color: var(--accent);
 }
 
 .toolbar-controls {
@@ -151,15 +160,17 @@ body {
   flex: 1;
 }
 
-.top-grid {
+.main-layout {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 18px;
+  align-items: start;
 }
 
-.bottom-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(280px, 1fr));
+.left-col,
+.right-col {
+  display: flex;
+  flex-direction: column;
   gap: 18px;
 }
 
@@ -233,9 +244,10 @@ body {
 .editor-host {
   overflow: hidden;
   padding: 0;
-  border-radius: 20px;
-  background: #1a2230;
-  color: #f7f4ec;
+  border-radius: 8px;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  border: 1px solid var(--border);
 }
 
 .code-errors {
@@ -251,11 +263,12 @@ body {
 .code-errors p {
   margin: 0;
   padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(217, 72, 95, 0.24);
-  background: rgba(217, 72, 95, 0.08);
-  color: #8a1d35;
-  font-size: 0.92rem;
+  border-radius: 6px;
+  border: 1px solid rgba(244, 135, 113, 0.4);
+  background: rgba(244, 135, 113, 0.1);
+  color: var(--error);
+  font-family: 'Cascadia Code', 'Consolas', monospace;
+  font-size: 0.9rem;
 }
 
 .cm-editor {
@@ -468,14 +481,30 @@ body {
   font-size: 0.9rem;
 }
 
+.log-list {
+  background: #1e1e1e;
+  border-radius: 8px;
+  padding: 8px;
+  overflow-y: auto;
+  max-height: 300px;
+}
+
 .log-list p,
 .explanation-copy p {
   margin: 0;
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: var(--surface-strong);
-  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #2d2d30;
   line-height: 1.5;
+  font-family: 'Cascadia Code', 'Consolas', monospace;
+  font-size: 0.9rem;
+  color: #d4d4d4;
+}
+
+.log-list p:last-child {
+  border-bottom: none;
 }
 
 .array-footer {
@@ -483,7 +512,11 @@ body {
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-  padding-top: 4px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
 }
 
 .array-controls {
@@ -511,21 +544,37 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 46px;
-  height: 46px;
+  width: 40px;
+  height: 40px;
   border: 1px solid var(--border);
-  border-radius: 16px;
-  background:
-    radial-gradient(circle at var(--mx) var(--my), rgba(225, 107, 45, 0.24), transparent 42%),
-    var(--surface-strong);
+  border-radius: 8px;
+  background: var(--surface-strong);
   color: var(--ink);
-  box-shadow: 0 12px 24px rgba(19, 34, 56, 0.08);
   transition:
     transform 140ms ease,
-    box-shadow 180ms ease,
-    border-color 180ms ease,
     background 180ms ease;
   cursor: pointer;
+}
+
+.icon-button[title="Run"] {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  width: auto;
+  padding: 0 16px;
+}
+
+.icon-button[title="Run"] .icon-button-glyph {
+  margin-right: 8px;
+}
+
+.icon-button[title="Run"] .sr-only {
+  position: static;
+  width: auto;
+  height: auto;
+  clip: auto;
+  margin: 0;
+  overflow: visible;
 }
 
 .icon-button:hover:not(:disabled) {

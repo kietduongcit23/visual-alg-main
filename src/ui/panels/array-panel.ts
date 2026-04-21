@@ -16,6 +16,7 @@ export interface PanelRefs {
   runButton: HTMLButtonElement;
   pauseButton: HTMLButtonElement;
   speedInput: HTMLInputElement;
+  footer: HTMLDivElement;
 }
 
 export function createArrayPanel(options: ArrayPanelOptions): PanelRefs {
@@ -76,10 +77,10 @@ export function createArrayPanel(options: ArrayPanelOptions): PanelRefs {
   controls.append(resetButton, nextButton, runButton, pauseButton);
 
   footer.append(speedGroup, controls);
-  body.append(stage, variables, legend, footer);
+  body.append(stage, variables, legend); // removed footer
 
   root.append(header, body);
-  return { root, stage, variables, legend, resetButton, nextButton, runButton, pauseButton, speedInput };
+  return { root, stage, variables, legend, resetButton, nextButton, runButton, pauseButton, speedInput, footer };
 }
 
 function createIconButton(label: string, icon: string, onClick: () => void): HTMLButtonElement {
