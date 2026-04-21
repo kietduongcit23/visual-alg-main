@@ -52,6 +52,19 @@ const cmView: EditorView = createCodeMirrorEditor(
   },
 );
 
+// ─── Theme Setup ─────────────────────────────────────────────────────────────
+
+const updateThemeIcon = (): void => {
+  const glyph = dom.themeToggle.querySelector('.icon-button-glyph');
+  if (glyph) {
+    glyph.textContent = document.documentElement.dataset.theme === 'light' ? '🌙' : '☀';
+  }
+};
+
+const isLight = localStorage.getItem('theme') === 'light';
+if (isLight) document.documentElement.dataset.theme = 'light';
+updateThemeIcon();
+
 // ─── Init ────────────────────────────────────────────────────────────────────
 
 renderLessonOptions();
@@ -60,6 +73,14 @@ syncLessonView();
 renderIdleSummary();
 
 // ─── Event listeners ─────────────────────────────────────────────────────────
+
+dom.themeToggle.addEventListener('click', () => {
+  const currentIsLight = document.documentElement.dataset.theme === 'light';
+  const newTheme = currentIsLight ? 'dark' : 'light';
+  document.documentElement.dataset.theme = newTheme;
+  localStorage.setItem('theme', newTheme);
+  updateThemeIcon();
+});
 
 dom.lessonSelect.addEventListener('change', () => {
   persistCurrentDraft();

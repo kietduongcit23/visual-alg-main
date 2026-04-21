@@ -32,20 +32,18 @@ export function createLayout(options: LayoutOptions): LayoutRefs {
   const shell = document.createElement('main');
   shell.className = 'app-shell';
 
+  // ── Top Header ────────────────────────────────────────────────────
   const header = document.createElement('header');
   header.className = 'app-header';
 
   const heading = document.createElement('div');
   heading.className = 'app-heading';
-  heading.innerHTML = `
-    <p class="eyebrow">Browser-only classroom tool</p>
-    <h1>${options.title}</h1>
-    <p class="subtitle">Step through array algorithms using a semantic event stream that updates each panel in sync.</p>
-  `;
+  heading.innerHTML = `<h1>${options.title}</h1>`;
 
   const status = document.createElement('p');
   status.className = 'status-banner';
 
+  // ── Create all panels ─────────────────────────────────────────────
   const toolbar = createToolbar({
     lessons: options.lessons,
     onLessonChange: options.onLessonChange,
@@ -63,23 +61,36 @@ export function createLayout(options: LayoutOptions): LayoutRefs {
   const log = createLogPanel();
   const explanation = createExplanationPanel();
 
+  // ── Theme Toggle ──────────────────────────────────────────────────
   const themeToggle = document.createElement('button');
   themeToggle.className = 'icon-button theme-toggle';
-  themeToggle.innerHTML = `<span class="icon-button-glyph">🌓</span>`;
   themeToggle.title = 'Toggle Theme';
+  themeToggle.innerHTML = `<span class="icon-button-glyph" aria-hidden="true">☀</span>`;
+
+  const updateThemeIcon = (): void => {
+    const glyph = themeToggle.querySelector('.icon-button-glyph');
+    if (glyph) {
+      glyph.textContent = document.documentElement.dataset.theme === 'light' ? '🌙' : '☀';
+    }
+  };
+
   themeToggle.onclick = () => {
     const isLight = document.documentElement.dataset.theme === 'light';
     const newTheme = isLight ? 'dark' : 'light';
     document.documentElement.dataset.theme = newTheme;
     localStorage.setItem('theme', newTheme);
+    updateThemeIcon();
   };
+  updateThemeIcon();
 
+  // ── Header Right: controls + theme ────────────────────────────────
   const headerRight = document.createElement('div');
   headerRight.className = 'header-right';
-  headerRight.append(themeToggle, array.footer);
+  headerRight.append(array.footer, themeToggle);
 
   header.append(heading, status, headerRight);
 
+  // ── App Body: sidebar + workspace ─────────────────────────────────
   const appBody = document.createElement('div');
   appBody.className = 'app-body';
 
@@ -90,41 +101,48 @@ export function createLayout(options: LayoutOptions): LayoutRefs {
   leftCol.className = 'left-col';
   leftCol.style.flex = '6';
 
-  const resizer = document.createElement('div');
-  resizer.className = 'resizer';
-
-  let isResizing = false;
-  resizer.addEventListener('mousedown', () => {
-    isResizing = true;
-    document.body.style.cursor = 'col-resize';
-  });
-  document.addEventListener('mousemove', (e) => {
-    if (!isResizing) return;
-    const containerWidth = mainContent.getBoundingClientRect().width;
-    const leftWidth = e.clientX - mainContent.getBoundingClientRect().left - 24; // account for padding
-    const ratio = leftWidth / containerWidth;
-    if (ratio > 0.2 && ratio < 0.8) {
-      leftCol.style.flex = `${ratio * 10}`;
-      rightCol.style.flex = `${(1 - ratio) * 10}`;
-    }
-  });
-  document.addEventListener('mouseup', () => {
-    if (isResizing) {
-      isResizing = false;
-      document.body.style.cursor = '';
-    }
-  });
-
   const rightCol = document.createElement('div');
   rightCol.className = 'right-col';
   rightCol.style.flex = '4';
 
+  // ── Resizer ───────────────────────────────────────────────────────
+  const resizer = document.createElement('div');
+  resizer.className = 'resizer';
+
+  let isResizing = false;
+
+  resizer.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    isResizing = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isResizing) return;
+    const rect = mainContent.getBoundingClientRect();
+    const leftWidth = e.clientX - rect.left;
+    const ratio = leftWidth / rect.width;
+    if (ratio > 0.25 && ratio < 0.75) {
+      leftCol.style.flex = `${ratio * 10}`;
+      rightCol.style.flex = `${(1 - ratio) * 10}`;
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isResizing) {
+      isResizing = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+  });
+
+  // ── Assemble ──────────────────────────────────────────────────────
   leftCol.append(explanation.root, code.root);
   rightCol.append(array.root, log.root);
   mainContent.append(leftCol, resizer, rightCol);
-
   appBody.append(toolbar.root, mainContent);
-
   shell.append(header, welcome.root, appBody);
+
   return { root: shell, toolbar, welcome, code, array, log, explanation, status };
 }

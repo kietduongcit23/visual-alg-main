@@ -3,15 +3,18 @@ import type { DomRefs } from './types';
 export function renderAppShell(container: HTMLElement): void {
   container.innerHTML = `
     <main class="page">
-      <section class="hero">
+      <section class="hero header-flex">
         <h1>Basic Algorithms on Arrays</h1>
+        <button id="themeToggle" class="icon-button theme-toggle" title="Toggle Theme">
+          <span class="icon-button-glyph" aria-hidden="true">☀</span>
+        </button>
       </section>
 
       <section class="grid">
         <div class="stack">
           <article class="panel">
             <div class="panel-header">
-              <h2 class="panel-title">Lesson <span id="lessonStats" style="font-size: 0.85em; font-weight: normal; margin-left: 8px; color: var(--text-2);"></span></h2>
+              <h2 class="panel-title">Lesson <span id="lessonStats" style="font-size: 0.85em; font-weight: normal; margin-left: 8px; color: var(--muted);"></span></h2>
             </div>
             <div class="panel-body">
               <div class="field">
@@ -45,7 +48,7 @@ export function renderAppShell(container: HTMLElement): void {
                 <button id="solutionButton" class="secondary" type="button">Solution</button>
                 <button id="resetButton" class="secondary" type="button">Reset Code</button>
               </div>
-              <pre id="javaOutput" style="background:#111;color:#0f0;padding:10px;"></pre>
+              <pre id="javaOutput" style="background:#0b1120;color:#94a3b8;padding:14px;border-radius:10px;border:1px solid rgba(148,163,184,0.12);font-family:'Fira Code',monospace;font-size:13px;line-height:1.6;min-height:40px;margin-top:12px;"></pre>
               <p class="hint editor-shortcuts">
                 <kbd>Ctrl+Enter</kbd> Chạy nhanh &nbsp;·&nbsp;
                 <kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> Thêm / bớt indent &nbsp;·&nbsp;
@@ -148,6 +151,7 @@ export function getDomRefs(root: ParentNode = document): DomRefs {
     sampleCase: mustElement<HTMLDivElement>(root, '#sampleCase'),
     hintPanel: mustElement<HTMLElement>(root, '#hintPanel'),
     hintBody: mustElement<HTMLElement>(root, '#hintBody'),
+    themeToggle: mustElement<HTMLButtonElement>(root, '#themeToggle'),
   };
 }
 

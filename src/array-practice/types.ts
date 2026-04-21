@@ -18,6 +18,7 @@ export interface DomRefs {
   sampleCase: HTMLDivElement;
   hintPanel: HTMLElement;
   hintBody: HTMLElement;
+  themeToggle: HTMLButtonElement;
 }
 
 export interface PersistedState {

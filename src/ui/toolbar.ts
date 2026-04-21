@@ -24,12 +24,21 @@ export function createToolbar(options: ToolbarOptions): ToolbarRefs {
 
   const buttons: Record<string, HTMLButtonElement> = {};
 
-  for (const lesson of options.lessons) {
+  for (let i = 0; i < options.lessons.length; i++) {
+    const lesson = options.lessons[i]!;
     const li = document.createElement('li');
     const button = document.createElement('button');
     button.className = 'lesson-item';
-    button.textContent = lesson.title;
     button.setAttribute('data-id', lesson.id);
+
+    const num = document.createElement('span');
+    num.className = 'lesson-num';
+    num.textContent = String(i + 1).padStart(2, '0');
+
+    const label = document.createElement('span');
+    label.textContent = lesson.title;
+
+    button.append(num, label);
 
     button.addEventListener('click', () => {
       options.onLessonChange(lesson.id);

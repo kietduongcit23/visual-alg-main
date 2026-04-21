@@ -38,16 +38,37 @@ export function createEditorController(
           }
         }),
         EditorView.theme({
-          '&': { fontSize: '14px' },
-          '.cm-content': { padding: '16px 0' },
-          '.cm-gutters': {
-            backgroundColor: 'transparent',
-            color: 'rgba(247, 244, 236, 0.42)',
-            border: 'none',
+          '&': {
+            fontSize: '14px',
+            fontFamily: "'Fira Code', 'Cascadia Code', 'Consolas', monospace",
           },
-          '.cm-activeLineGutter': { backgroundColor: 'transparent' },
+          '.cm-content': {
+            padding: '16px 0',
+            color: 'var(--code-text)',
+            caretColor: 'var(--code-caret)',
+          },
+          '.cm-gutters': {
+            backgroundColor: 'var(--code-gutter)',
+            color: 'var(--muted)',
+            border: 'none',
+            borderRight: '1px solid var(--border)',
+          },
+          '.cm-activeLineGutter': {
+            backgroundColor: 'var(--code-active-line)',
+            color: 'var(--accent)',
+          },
+          '.cm-activeLine': {
+            backgroundColor: 'var(--code-active-line)',
+          },
           '.cm-line': { paddingInline: '16px' },
-          '.cm-cursor': { borderLeftColor: '#f7f4ec' },
+          '.cm-cursor': { borderLeftColor: 'var(--code-caret)', borderLeftWidth: '2px' },
+          '.cm-selectionBackground, &.cm-focused .cm-selectionBackground': {
+            background: 'var(--code-selection) !important',
+          },
+          '.cm-matchingBracket': {
+            background: 'var(--accent-soft)',
+            outline: '1px solid var(--accent)',
+          },
         }),
       ],
     }),

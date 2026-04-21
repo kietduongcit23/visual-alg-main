@@ -36,45 +36,53 @@ import {
 
 const editorTheme = EditorView.theme({
   '&': {
-    fontSize: '0.93rem',
-    fontFamily: "'Consolas', 'Cascadia Code', 'Courier New', monospace",
-    borderRadius: '16px',
+    fontSize: '14px',
+    fontFamily: "'Fira Code', 'Consolas', 'Cascadia Code', monospace",
+    borderRadius: '12px',
     overflow: 'hidden',
-    border: '1px solid rgba(52, 43, 30, 0.18)',
-    background: 'rgba(255, 253, 247, 0.96)',
+    border: '1px solid var(--editor-border)',
+    background: 'var(--editor-bg)',
     minHeight: '380px',
   },
   '&.cm-focused': {
     outline: 'none',
-    border: '1px solid rgba(28, 124, 84, 0.5)',
-    boxShadow: '0 0 0 3px rgba(28, 124, 84, 0.1)',
+    border: '1px solid var(--accent)',
+    boxShadow: '0 0 0 3px var(--accent-soft)',
   },
   '.cm-scroller': {
-    lineHeight: '1.6',
+    lineHeight: '1.65',
     minHeight: '380px',
   },
   '.cm-gutters': {
-    background: 'rgba(243, 239, 230, 0.8)',
-    borderRight: '1px solid rgba(52, 43, 30, 0.1)',
-    color: '#9f9080',
-    borderRadius: '16px 0 0 16px',
+    background: 'var(--editor-gutter)',
+    borderRight: '1px solid var(--border)',
+    color: 'var(--muted)',
+    borderRadius: '12px 0 0 12px',
   },
   '.cm-activeLineGutter': {
-    background: 'rgba(28, 124, 84, 0.08)',
+    background: 'var(--editor-active-gutter)',
+    color: 'var(--text)',
   },
   '.cm-activeLine': {
-    background: 'rgba(28, 124, 84, 0.04)',
+    background: 'var(--editor-active-line)',
   },
   '.cm-cursor': {
-    borderLeftColor: '#1c7c54',
+    borderLeftColor: 'var(--editor-caret)',
     borderLeftWidth: '2px',
   },
   '.cm-selectionBackground, &.cm-focused .cm-selectionBackground': {
-    background: 'rgba(28, 124, 84, 0.15)',
+    background: 'var(--editor-selection)',
   },
   '.cm-matchingBracket': {
-    background: 'rgba(28, 124, 84, 0.2)',
-    outline: '1px solid rgba(28, 124, 84, 0.4)',
+    background: 'var(--editor-selection)',
+    outline: '1px solid var(--editor-border)',
+  },
+  '.cm-content': {
+    color: 'var(--text)',
+    caretColor: 'var(--editor-caret)',
+  },
+  '.cm-line': {
+    padding: '0 8px',
   },
 });
 
