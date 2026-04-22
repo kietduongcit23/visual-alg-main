@@ -62,17 +62,24 @@ void createMonacoEditor(
 });
 
 // ─── Theme Setup ─────────────────────────────────────────────────────────────
+let isDark = localStorage.getItem('theme') !== 'light'; // Default to dark
 
-const updateThemeIcon = (): void => {
+const updateTheme = (): void => {
   const glyph = dom.themeToggle.querySelector('.icon-button-glyph');
   if (glyph) {
-    glyph.textContent = document.documentElement.dataset.theme === 'light' ? '🌙' : '☀';
+    glyph.textContent = isDark ? '🌙' : '☀️';
   }
+  
+  // Apply theme to scoped container
+  dom.layout.classList.toggle('dark-theme', isDark);
+  dom.layout.classList.toggle('light-theme', !isDark);
+  
+  // Update Monaco
+  updateMonacoTheme(isDark);
 };
 
-const isLight = localStorage.getItem('theme') === 'light';
-if (isLight) document.documentElement.dataset.theme = 'light';
-updateThemeIcon();
+// Initial theme apply
+updateTheme();
 
 // ─── Init ────────────────────────────────────────────────────────────────────
 
@@ -101,12 +108,9 @@ if (localStorage.getItem('sidebar-collapsed') === 'true') {
 // ─── Event listeners ─────────────────────────────────────────────────────────
 
 dom.themeToggle.addEventListener('click', () => {
-  const currentIsLight = document.documentElement.dataset.theme === 'light';
-  const newTheme = currentIsLight ? 'dark' : 'light';
-  document.documentElement.dataset.theme = newTheme;
-  localStorage.setItem('theme', newTheme);
-  updateThemeIcon();
-  updateMonacoTheme(newTheme);
+  isDark = !isDark;
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  updateTheme();
 });
 
 dom.resetButton.addEventListener('click', () => {

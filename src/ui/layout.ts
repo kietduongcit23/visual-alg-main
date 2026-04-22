@@ -5,6 +5,7 @@ import { createCodePanel, type CodePanelRefs } from './panels/code-panel';
 import { createExplanationPanel, type PanelRefs } from './panels/explanation-panel';
 import { createLogPanel } from './panels/log-panel';
 import { createWelcomePanel, type WelcomePanelRefs } from './panels/welcome-panel';
+import { updateMonacoTheme } from '../array-practice/editor';
 
 interface LayoutOptions {
   title: string;
@@ -73,13 +74,15 @@ export function createLayout(options: LayoutOptions): LayoutRefs {
   const updateThemeIcon = (): void => {
     const glyph = themeToggle.querySelector('.icon-button-glyph');
     if (glyph) {
-      glyph.textContent = document.documentElement.dataset.theme === 'light' ? '🌙' : '☀';
+      const isDark = document.documentElement.dataset.theme === 'dark';
+      glyph.textContent = isDark ? '🌙' : '☀️';
+      updateMonacoTheme(isDark);
     }
   };
 
   themeToggle.onclick = () => {
-    const isLight = document.documentElement.dataset.theme === 'light';
-    const newTheme = isLight ? 'dark' : 'light';
+    const isDark = document.documentElement.dataset.theme === 'dark';
+    const newTheme = isDark ? 'light' : 'dark';
     document.documentElement.dataset.theme = newTheme;
     localStorage.setItem('theme', newTheme);
     updateThemeIcon();

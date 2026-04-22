@@ -13,8 +13,9 @@ import { renderArrayPanel } from '../visual/array-renderer';
 import { renderVariablesPanel } from '../visual/variable-renderer';
 import { setActiveLessonId } from '../editor/suggestions';
 
-const isLight = localStorage.getItem('theme') === 'light';
-if (isLight) document.documentElement.dataset.theme = 'light';
+const savedTheme = localStorage.getItem('theme');
+const isDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
 
 export function bootstrap(container: HTMLDivElement | null): void {
   if (!container) {

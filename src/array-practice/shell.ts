@@ -2,7 +2,7 @@ import type { DomRefs } from './types';
 
 export function renderAppShell(container: HTMLElement): void {
   container.innerHTML = `
-    <div class="app-layout">
+    <div id="appLayout" class="app-layout">
       <!-- Sidebar -->
       <aside id="sidebar" class="sidebar">
         <div class="sidebar-header">
@@ -161,6 +161,7 @@ export function renderAppShell(container: HTMLElement): void {
 
 export function getDomRefs(root: ParentNode = document): DomRefs {
   return {
+    layout: mustElement<HTMLElement>(root, '#appLayout'),
     sidebar: mustElement<HTMLElement>(root, '#sidebar'),
     sidebarToggle: mustElement<HTMLButtonElement>(root, '#sidebarToggle'),
     lessonList: mustElement<HTMLElement>(root, '#lessonList'),

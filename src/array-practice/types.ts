@@ -1,4 +1,5 @@
 export interface DomRefs {
+  layout: HTMLElement;
   sidebar: HTMLElement;
   sidebarToggle: HTMLButtonElement;
   lessonList: HTMLElement;

@@ -25,7 +25,7 @@ export function createEditorController(
   const editor = monaco.editor.create(parent, {
     value: '',
     language: 'java',
-    theme: 'vs-dark',
+    theme: (document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) ? 'vs-dark' : 'vs',
     fontSize: 14,
     fontFamily: "'Fira Code', 'Cascadia Code', 'Consolas', monospace",
     lineNumbers: 'on',
