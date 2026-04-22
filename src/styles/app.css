@@ -6,50 +6,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap');
 
 /* ── Dark Theme (Default) ─────────────────────────────────────────────── */
+/* ── Global Variables (Light Theme by Default) ────────────────────────── */
 :root {
-  color-scheme: dark;
-  --bg:             #020617;
-  --surface:        #0f172a;
-  --surface-strong: #1e293b;
-  --ink:            #e5e7eb;
-  --muted:          #94a3b8;
-  --accent:         #6366f1;
-  --accent-hover:   #818cf8;
-  --accent-soft:    rgba(99, 102, 241, 0.15);
-  --teal:           #2dd4bf;
-  --teal-soft:      rgba(45, 212, 191, 0.15);
-  --error:          #f87171;
-  --error-soft:     rgba(248, 113, 113, 0.12);
-  --success:        #34d399;
-  --warning:        #fbbf24;
-  --line-active:    rgba(99, 102, 241, 0.12);
-  --border:         rgba(148, 163, 184, 0.1);
-  --shadow:         0 4px 32px rgba(0, 0, 0, 0.4);
-  --shadow-lg:      0 8px 48px rgba(0, 0, 0, 0.5);
-  --radius:         16px;
-  --radius-sm:      10px;
-  --radius-xs:      6px;
-  --transition:     0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  --font-sans:      'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono:      'Fira Code', 'Cascadia Code', 'Consolas', monospace;
-
-  /* Code Editor Variables */
-  --code-bg:        var(--bg);
-  --code-text:      var(--ink);
-  --code-gutter:    var(--surface);
-  --code-active-line: rgba(99, 102, 241, 0.15);
-  --code-selection:   rgba(99, 102, 241, 0.25);
-  --code-caret:      var(--accent);
-}
-
-/* ── Light Theme ──────────────────────────────────────────────────────── */
-:root[data-theme="light"] {
   color-scheme: light;
   --bg:             #f8fafc;
   --surface:        #f1f5f9;
   --surface-strong: #ffffff;
-  --ink:            #0f172a;
-  --muted:          #64748b;
+  --text-primary:   #111827;
+  --text-secondary: #374151;
+  --title-color:    #1f2937;
+  --text-color:     var(--text-primary);
+  --ink:            var(--text-primary);
+  --muted:          var(--text-secondary);
   --accent:         #4f46e5;
   --accent-hover:   #6366f1;
   --accent-soft:    rgba(79, 70, 229, 0.10);
@@ -63,15 +31,53 @@
   --border:         rgba(148, 163, 184, 0.18);
   --shadow:         0 4px 16px rgba(0, 0, 0, 0.08);
   --shadow-lg:      0 8px 32px rgba(0, 0, 0, 0.12);
+  --radius:         16px;
+  --radius-sm:      10px;
+  --radius-xs:      6px;
+  --transition:     0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --font-sans:      'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono:      'Fira Code', 'Cascadia Code', 'Consolas', monospace;
 
   /* Code Editor Variables */
   --code-bg:        #e2e8f0;
-  --code-text:      var(--ink);
+  --code-text:      var(--text-primary);
   --code-gutter:    #d0d7de;
   --code-active-line: rgba(79, 70, 229, 0.1);
   --code-selection:   rgba(79, 70, 229, 0.15);
   --code-caret:      var(--accent);
 }
+
+/* ── Dark Theme Overrides ─────────────────────────────────────────────── */
+.dark {
+  color-scheme: dark;
+  --bg:             #020617;
+  --surface:        #0f172a;
+  --surface-strong: #1e293b;
+  --text-primary:   #f3f4f6;
+  --text-secondary: #9ca3af;
+  --title-color:    #e2e8f0;
+  --accent:         #6366f1;
+  --accent-hover:   #818cf8;
+  --accent-soft:    rgba(99, 102, 241, 0.15);
+  --teal:           #2dd4bf;
+  --teal-soft:      rgba(45, 212, 191, 0.15);
+  --error:          #f87171;
+  --error-soft:     rgba(248, 113, 113, 0.12);
+  --success:        #34d399;
+  --warning:        #fbbf24;
+  --line-active:    rgba(99, 102, 241, 0.12);
+  --border:         rgba(148, 163, 184, 0.1);
+  --shadow:         0 4px 32px rgba(0, 0, 0, 0.4);
+  --shadow-lg:      0 8px 48px rgba(0, 0, 0, 0.5);
+
+  /* Code Editor Variables */
+  --code-bg:        var(--bg);
+  --code-active-line: rgba(99, 102, 241, 0.15);
+  --code-selection:   rgba(99, 102, 241, 0.25);
+  --code-caret:      var(--accent);
+}
+
+/* ── Light Theme ──────────────────────────────────────────────────────── */
 
 /* ── Global Reset & Base ──────────────────────────────────────────────── */
 body {
@@ -79,12 +85,22 @@ body {
   height: 100vh;
   overflow: hidden;
   background: var(--bg);
-  color: var(--ink);
+  color: var(--text-primary);
   font-family: var(--font-sans);
   font-size: 14px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  transition: background var(--transition), color var(--transition);
+  transition: background-color 0.25s ease;
+}
+
+h1, h2, h3, h4, h5, h6, p, span, div, li, button, input, select {
+  transition: color 0.2s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-top: 0;
 }
 
 /* Subtle noise texture */
@@ -128,7 +144,7 @@ body::after {
   flex-shrink: 0;
   z-index: 100;
   backdrop-filter: blur(16px);
-  transition: all var(--transition);
+  transition: background-color var(--transition), border-color var(--transition), box-shadow var(--transition);
 }
 
 .app-heading {
@@ -163,7 +179,7 @@ body::after {
   border-radius: var(--radius-sm);
   background: var(--surface-strong);
   border: 1px solid var(--border);
-  transition: all var(--transition);
+  transition: background-color var(--transition), border-color var(--transition), box-shadow var(--transition);
 }
  
 .hub-link:hover {
@@ -228,7 +244,7 @@ body::after {
   padding: 16px 20px 12px;
   font-size: 0.7rem;
   font-weight: 700;
-  color: var(--muted);
+  color: var(--title-color);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   border-bottom: 1px solid var(--border);
@@ -255,7 +271,7 @@ body::after {
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all var(--transition);
+  transition: background-color var(--transition), border-color var(--transition), box-shadow var(--transition);
   position: relative;
   display: flex;
   align-items: center;
@@ -266,7 +282,6 @@ body::after {
   font-size: 0.7rem;
   font-weight: 700;
   color: var(--muted);
-  opacity: 0.5;
   font-family: var(--font-mono);
   min-width: 20px;
 }
@@ -472,7 +487,7 @@ body::after {
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition);
+  transition: background-color var(--transition), border-color var(--transition), box-shadow var(--transition);
 }
 
 .welcome-dismiss:hover {
@@ -501,7 +516,7 @@ body::after {
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition);
+  transition: background-color var(--transition), border-color var(--transition), box-shadow var(--transition);
 }
 
 .mode-toggle:hover {
@@ -637,7 +652,7 @@ body::after {
   border-radius: 12px;
   background: var(--surface-strong);
   text-align: center;
-  transition: all var(--transition);
+  transition: background-color var(--transition), border-color var(--transition), box-shadow var(--transition);
 }
 
 .array-cell.is-read {
@@ -848,7 +863,7 @@ body::after {
   background: var(--surface-strong);
   color: var(--ink);
   cursor: pointer;
-  transition: all var(--transition);
+  transition: background-color var(--transition), border-color var(--transition), box-shadow var(--transition);
   font-size: 1.1rem;
 }
 

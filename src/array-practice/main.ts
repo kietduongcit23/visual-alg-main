@@ -62,9 +62,8 @@ void createMonacoEditor(
 });
 
 // ─── Theme Setup ─────────────────────────────────────────────────────────────
-let isDark = localStorage.getItem('theme') !== 'light'; // Default to dark
-
 const updateTheme = (): void => {
+  const isDark = document.documentElement.classList.contains('dark');
   const glyph = dom.themeToggle.querySelector('.icon-button-glyph');
   if (glyph) {
     glyph.textContent = isDark ? '🌙' : '☀️';
@@ -108,7 +107,8 @@ if (localStorage.getItem('sidebar-collapsed') === 'true') {
 // ─── Event listeners ─────────────────────────────────────────────────────────
 
 dom.themeToggle.addEventListener('click', () => {
-  isDark = !isDark;
+  document.documentElement.classList.toggle('dark');
+  const isDark = document.documentElement.classList.contains('dark');
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
   updateTheme();
 });

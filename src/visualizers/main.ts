@@ -12,7 +12,7 @@ const app = document.getElementById('app')!;
 function renderHub() {
   app.innerHTML = `
     <div class="visualizer-hub">
-      <header class="app-header" style="margin-bottom: 40px; border-radius: var(--radius)">
+      <header class="app-header">
         <div class="app-heading">
           <h1>Algorithm Visualizer</h1>
           <a href="/visual-alg-main/" class="hub-link">Back to Lessons</a>
@@ -99,7 +99,7 @@ function renderHub() {
 function startVisualizer(algo: string) {
   app.innerHTML = `
     <div class="visualizer-page">
-      <header class="app-header" style="height: 60px;">
+      <header class="app-header">
         <div class="app-heading">
           <a href="#" class="back-link" id="back-to-hub" style="margin: 0;">← Hub</a>
           <span style="color: var(--muted); margin: 0 12px;">/</span>

@@ -10,11 +10,48 @@ export interface EditorController {
   dispose: () => void;
 }
 
-// Initialize both suggestion systems (they complement each other):
-// - javaIntelliSense: static Java API completions (System.out, Math, etc.)
-// - suggestions: context-aware, lesson-aware smart completions
 setupJavaIntelliSense();
 registerSuggestions();
+
+// ─── Theme Definitions (MUST run before editor init) ──────────────────────
+
+monaco.editor.defineTheme('custom-dark', {
+  base: 'vs-dark',
+  inherit: true,
+  rules: [],
+  colors: {
+    'editor.background': '#0f172a',
+    'editor.foreground': '#e2e8f0',
+    'editorSuggestWidget.background': '#1e293b',
+    'editorSuggestWidget.foreground': '#e2e8f0',
+    'editorSuggestWidget.selectedBackground': '#334155',
+    'editorSuggestWidget.border': '#475569',
+    'editorHoverWidget.background': '#1e293b',
+    'editorHoverWidget.foreground': '#e2e8f0',
+    'scrollbarSlider.background': '#47556980',
+    'scrollbarSlider.hoverBackground': '#475569',
+    'scrollbarSlider.activeBackground': '#64748b',
+  }
+});
+
+monaco.editor.defineTheme('custom-light', {
+  base: 'vs',
+  inherit: true,
+  rules: [],
+  colors: {
+    'editor.background': '#ffffff',
+    'editor.foreground': '#111827',
+    'editorSuggestWidget.background': '#ffffff',
+    'editorSuggestWidget.foreground': '#111827',
+    'editorSuggestWidget.selectedBackground': '#e5e7eb',
+    'editorSuggestWidget.border': '#e5e7eb',
+    'editorHoverWidget.background': '#ffffff',
+    'editorHoverWidget.foreground': '#111827',
+    'scrollbarSlider.background': '#00000010',
+    'scrollbarSlider.hoverBackground': '#00000020',
+    'scrollbarSlider.activeBackground': '#00000030',
+  }
+});
 
 export function createEditorController(
   parent: HTMLElement,
@@ -25,7 +62,7 @@ export function createEditorController(
   const editor = monaco.editor.create(parent, {
     value: '',
     language: 'java',
-    theme: (document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) ? 'vs-dark' : 'vs',
+    theme: document.documentElement.classList.contains('dark') ? 'custom-dark' : 'custom-light',
     fontSize: 14,
     fontFamily: "'Fira Code', 'Cascadia Code', 'Consolas', monospace",
     lineNumbers: 'on',
@@ -106,4 +143,8 @@ export function createEditorController(
       editor.dispose();
     }
   };
+}
+
+export function updateMonacoTheme(isDark: boolean): void {
+  monaco.editor.setTheme(isDark ? 'custom-dark' : 'custom-light');
 }

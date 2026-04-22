@@ -1,6 +1,6 @@
 import { appConfig } from './config';
 import { loadPersistedAppState, savePersistedAppState } from './persistence';
-import { createEditorController } from '../editor/editor';
+import { createEditorController, updateMonacoTheme } from '../editor/editor';
 import { InterpreterRunner } from '../engine/interpreter-runner';
 import { validateSource } from '../engine/validator';
 import { getLessonById, lessons } from '../lessons/registry';
@@ -14,8 +14,8 @@ import { renderVariablesPanel } from '../visual/variable-renderer';
 import { setActiveLessonId } from '../editor/suggestions';
 
 const savedTheme = localStorage.getItem('theme');
-const isDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
-document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
+const isDarkInit = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+document.documentElement.classList.toggle('dark', isDarkInit);
 
 export function bootstrap(container: HTMLDivElement | null): void {
   if (!container) {
@@ -116,6 +116,9 @@ export function bootstrap(container: HTMLDivElement | null): void {
         render();
       }
     },
+    onThemeToggle: () => {
+      render();
+    }
   });
 
   const editor = createEditorController(layout.code.editorMount, (value) => {
@@ -318,6 +321,17 @@ export function bootstrap(container: HTMLDivElement | null): void {
     layout.explanation.body.replaceChildren(paragraph(state.explanation));
     layout.code.errorList.replaceChildren(...validationMessages.map((message) => paragraph(message)));
     layout.code.errorList.classList.toggle('has-errors', hasValidationErrors);
+
+    const isDark = document.documentElement.classList.contains('dark');
+    
+    // Sync Monaco
+    updateMonacoTheme(isDark);
+    
+    // Refresh layout-specific theme elements (like icons)
+    const themeGlyph = layout.root.querySelector('.icon-button-glyph');
+    if (themeGlyph) {
+      themeGlyph.textContent = isDark ? '🌙' : '☀️';
+    }
   }
 
   function persist(): void {

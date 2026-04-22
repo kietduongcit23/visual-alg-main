@@ -16,6 +16,7 @@ interface LayoutOptions {
   onRun: () => void;
   onPause: () => void;
   onSpeedChange: (speed: number) => void;
+  onThemeToggle: () => void;
 }
 
 export interface LayoutRefs {
@@ -72,19 +73,18 @@ export function createLayout(options: LayoutOptions): LayoutRefs {
   themeToggle.innerHTML = `<span class="icon-button-glyph" aria-hidden="true">☀</span>`;
 
   const updateThemeIcon = (): void => {
+    const isDark = document.documentElement.classList.contains('dark');
     const glyph = themeToggle.querySelector('.icon-button-glyph');
     if (glyph) {
-      const isDark = document.documentElement.dataset.theme === 'dark';
       glyph.textContent = isDark ? '🌙' : '☀️';
       updateMonacoTheme(isDark);
     }
   };
 
   themeToggle.onclick = () => {
-    const isDark = document.documentElement.dataset.theme === 'dark';
-    const newTheme = isDark ? 'light' : 'dark';
-    document.documentElement.dataset.theme = newTheme;
-    localStorage.setItem('theme', newTheme);
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    options.onThemeToggle(); // Optional callback for app-level refresh
     updateThemeIcon();
   };
   updateThemeIcon();
