@@ -1,107 +1,109 @@
-import { defaultKeymap } from '@codemirror/commands';
-import { javascript } from '@codemirror/lang-javascript';
-import { Compartment, EditorState } from '@codemirror/state';
-import { EditorView, keymap, lineNumbers } from '@codemirror/view';
-
-import { createRuntimeHighlightExtension } from './highlighting';
+import * as monaco from 'monaco-editor';
+import { setupJavaIntelliSense } from './javaIntelliSense';
+import { registerSuggestions } from './suggestions';
 
 export interface EditorController {
   setValue: (value: string) => void;
   getValue: () => string;
   setEditable: (isEditable: boolean) => void;
   highlightLine: (lineNumber: number | null) => void;
+  dispose: () => void;
 }
+
+// Initialize both suggestion systems (they complement each other):
+// - javaIntelliSense: static Java API completions (System.out, Math, etc.)
+// - suggestions: context-aware, lesson-aware smart completions
+setupJavaIntelliSense();
+registerSuggestions();
 
 export function createEditorController(
   parent: HTMLElement,
   onChange?: (value: string) => void,
 ): EditorController {
-  let activeLine: number | null = null;
-  const highlightExtension = createRuntimeHighlightExtension(() => activeLine);
-  const editableCompartment = new Compartment();
-  let currentValue = '';
+  let activeDecorations: string[] = [];
 
-  const view = new EditorView({
-    state: EditorState.create({
-      doc: '',
-      extensions: [
-        lineNumbers(),
-        keymap.of(defaultKeymap),
-        javascript(),
-        editableCompartment.of(EditorView.editable.of(true)),
-        EditorView.lineWrapping,
-        highlightExtension,
-        EditorView.updateListener.of((update) => {
-          if (update.docChanged) {
-            currentValue = update.state.doc.toString();
-            onChange?.(currentValue);
-          }
-        }),
-        EditorView.theme({
-          '&': {
-            fontSize: '14px',
-            fontFamily: "'Fira Code', 'Cascadia Code', 'Consolas', monospace",
-          },
-          '.cm-content': {
-            padding: '16px 0',
-            color: 'var(--code-text)',
-            caretColor: 'var(--code-caret)',
-          },
-          '.cm-gutters': {
-            backgroundColor: 'var(--code-gutter)',
-            color: 'var(--muted)',
-            border: 'none',
-            borderRight: '1px solid var(--border)',
-          },
-          '.cm-activeLineGutter': {
-            backgroundColor: 'var(--code-active-line)',
-            color: 'var(--accent)',
-          },
-          '.cm-activeLine': {
-            backgroundColor: 'var(--code-active-line)',
-          },
-          '.cm-line': { paddingInline: '16px' },
-          '.cm-cursor': { borderLeftColor: 'var(--code-caret)', borderLeftWidth: '2px' },
-          '.cm-selectionBackground, &.cm-focused .cm-selectionBackground': {
-            background: 'var(--code-selection) !important',
-          },
-          '.cm-matchingBracket': {
-            background: 'var(--accent-soft)',
-            outline: '1px solid var(--accent)',
-          },
-        }),
-      ],
-    }),
-    parent,
+  const editor = monaco.editor.create(parent, {
+    value: '',
+    language: 'java',
+    theme: 'vs-dark',
+    fontSize: 14,
+    fontFamily: "'Fira Code', 'Cascadia Code', 'Consolas', monospace",
+    lineNumbers: 'on',
+    renderLineHighlight: 'all',
+    scrollBeyondLastLine: false,
+    automaticLayout: true,
+    tabSize: 4,
+    wordWrap: 'on',
+    minimap: { enabled: false },
+    cursorBlinking: 'smooth',
+    cursorSmoothCaretAnimation: 'on',
+    bracketPairColorization: { enabled: true },
+    autoClosingBrackets: 'always',
+    autoClosingQuotes: 'always',
+    formatOnType: true,
+    padding: { top: 16, bottom: 16 },
+    
+    // VS Code-style Suggestion Options
+    quickSuggestions: {
+      other: true,
+      comments: false,
+      strings: true
+    },
+    suggestOnTriggerCharacters: true,
+    tabCompletion: "on",
+    acceptSuggestionOnEnter: "on",
+    wordBasedSuggestions: "allDocuments",
+    suggestSelection: 'first',
+    snippetSuggestions: 'top',
+    
+    
+    // Smooth navigation
+    smoothScrolling: true,
+    mouseWheelZoom: true,
+
+    // Parameter hints (show signature info when inside function calls)
+    parameterHints: { enabled: true },
+  });
+
+  editor.onDidChangeModelContent(() => {
+    onChange?.(editor.getValue());
+    // Aggressively trigger suggestions while typing
+    editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
   });
 
   return {
     setValue(value: string) {
-      if (value === currentValue) {
+      if (value !== editor.getValue()) {
+        editor.setValue(value);
+      }
+    },
+    getValue() {
+      return editor.getValue();
+    },
+    setEditable(isEditable: boolean) {
+      editor.updateOptions({ readOnly: !isEditable });
+    },
+    highlightLine(lineNumber: number | null) {
+      if (lineNumber === null) {
+        activeDecorations = editor.deltaDecorations(activeDecorations, []);
         return;
       }
 
-      currentValue = value;
-      view.dispatch({
-        changes: {
-          from: 0,
-          to: view.state.doc.length,
-          insert: value,
-        },
-      });
+      activeDecorations = editor.deltaDecorations(activeDecorations, [
+        {
+          range: new monaco.Range(lineNumber, 1, lineNumber, 1),
+          options: {
+            isWholeLine: true,
+            className: 'monaco-active-line-highlight',
+            glyphMarginClassName: 'monaco-active-line-glyph'
+          }
+        }
+      ]);
+      
+      editor.revealLineInCenterIfOutsideViewport(lineNumber);
     },
-    getValue() {
-      return currentValue;
-    },
-    setEditable(isEditable) {
-      view.dispatch({
-        effects: editableCompartment.reconfigure(EditorView.editable.of(isEditable)),
-      });
-      view.contentDOM.toggleAttribute('aria-readonly', !isEditable);
-    },
-    highlightLine(lineNumber: number | null) {
-      activeLine = lineNumber;
-      view.dispatch({ effects: [] });
-    },
+    dispose() {
+      editor.dispose();
+    }
   };
 }

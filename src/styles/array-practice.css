@@ -20,6 +20,8 @@
   --failed-soft: rgba(243, 139, 168, 0.12);
   --shadow: 0 4px 32px rgba(0, 0, 0, 0.4);
   --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --teal: #2dd4bf;
+  --teal-soft: rgba(45, 212, 191, 0.15);
   /* Editor Theme — VS Code Dark+ Brighter */
   --editor-bg: #1e1e1e;
   --editor-gutter: #1e1e1e;
@@ -56,6 +58,8 @@
   --danger: #cf222e;
   --failed-soft: rgba(207, 34, 46, 0.08);
   --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --teal: #0d9488;
+  --teal-soft: rgba(13, 148, 136, 0.1);
   /* Editor Theme — Balanced Light */
   --editor-bg: #f8fafc;
   --editor-gutter: #f1f5f9;
@@ -327,7 +331,7 @@ body::before {
 }
 
 .app-header {
-  height: 60px;
+  height: 100px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -343,18 +347,13 @@ body::before {
 .header-main-group {
   display: flex;
   flex-direction: column;
+  gap: 4px;
 }
 
 .header-title-row {
   display: flex;
   align-items: center;
   gap: 16px;
-}
-
-.header-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
 }
 
 .stats-badge-group {
@@ -407,7 +406,7 @@ body::before {
 }
 
 .stats-progress-container {
-  width: 180px;
+  width: 300px;
   height: 5px;
   background: var(--border);
   border-radius: 3px;
@@ -435,16 +434,36 @@ body::before {
 }
 
 .premium-title {
-  font-size: 2.8rem;
-  font-weight: 800;
   margin: 0;
+  font-size: 2.2rem;
+  font-weight: 900;
   letter-spacing: -0.04em;
   line-height: 1.1;
-  background: linear-gradient(90deg, #6366f1, #22d3ee);
+  white-space: nowrap;
+  background: linear-gradient(135deg, #6366f1, #2dd4bf);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 0 32px rgba(99, 102, 241, 0.3));
+  filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.3));
+}
+
+.hub-link {
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  transition: all var(--transition);
+}
+
+.hub-link:hover {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  transform: translateY(-1px);
 }
 
 .header-stats {

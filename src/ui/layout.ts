@@ -38,7 +38,10 @@ export function createLayout(options: LayoutOptions): LayoutRefs {
 
   const heading = document.createElement('div');
   heading.className = 'app-heading';
-  heading.innerHTML = `<h1>${options.title}</h1>`;
+  heading.innerHTML = `
+    <h1>${options.title}</h1>
+    <a href="/visual-alg-main/visualizer.html" class="hub-link">Visualizer Hub</a>
+  `;
 
   const status = document.createElement('p');
   status.className = 'status-banner';

@@ -8,6 +8,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         practice: resolve(__dirname, 'array-algorithms.html'),
+        visualizer: resolve(__dirname, 'visualizer.html'),
       },
     },
   },

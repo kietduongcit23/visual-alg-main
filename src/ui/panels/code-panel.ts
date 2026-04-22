@@ -4,7 +4,9 @@ export interface CodePanelRefs {
   modeButton: HTMLButtonElement;
   copyButton: HTMLButtonElement;
   resetCodeButton: HTMLButtonElement;
+  runCodeButton: HTMLButtonElement;
   errorList: HTMLDivElement;
+  console: HTMLDivElement;
 }
 
 export function createCodePanel(): CodePanelRefs {
@@ -18,6 +20,11 @@ export function createCodePanel(): CodePanelRefs {
 
   const headerActions = document.createElement('div');
   headerActions.className = 'code-panel-actions';
+
+  const runCodeButton = document.createElement('button');
+  runCodeButton.type = 'button';
+  runCodeButton.className = 'mode-toggle run-button';
+  runCodeButton.innerHTML = '▶ Run Code';
 
   const modeButton = document.createElement('button');
   modeButton.type = 'button';
@@ -36,17 +43,23 @@ export function createCodePanel(): CodePanelRefs {
 
   const tag = document.createElement('span');
   tag.className = 'panel-tag';
-  tag.textContent = 'CodeMirror 6';
+  tag.textContent = 'Monaco Editor';
 
-  headerActions.append(modeButton, copyButton, resetCodeButton, tag);
+  headerActions.append(runCodeButton, modeButton, copyButton, resetCodeButton, tag);
   header.append(title, headerActions);
 
   const editorMount = document.createElement('div');
   editorMount.className = 'panel-body editor-host';
+  editorMount.style.height = '400px';
+
+  const console = document.createElement('div');
+  console.id = 'editor-console';
+  console.className = 'editor-console';
+  console.innerHTML = '<div class="console-header" style="display: flex; align-items: center;">Console Output</div><div class="console-body"></div>';
 
   const errorList = document.createElement('div');
   errorList.className = 'code-errors';
 
-  root.append(header, editorMount, errorList);
-  return { root, editorMount, modeButton, copyButton, resetCodeButton, errorList };
+  root.append(header, editorMount, console, errorList);
+  return { root, editorMount, modeButton, copyButton, resetCodeButton, runCodeButton, errorList, console };
 }

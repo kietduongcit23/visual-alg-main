@@ -30,6 +30,7 @@ export function renderAppShell(container: HTMLElement): void {
             </div>
           </div>
           <div class="header-right">
+            <a href="/visual-alg-main/visualizer.html" class="hub-link" style="margin-right: 12px;">Visualizer Hub</a>
             <button id="themeToggle" class="icon-button theme-toggle" title="Toggle Theme">
               <span class="icon-button-glyph" aria-hidden="true">☀</span>
             </button>

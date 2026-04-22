@@ -11,6 +11,7 @@ import { createLayout } from '../ui/layout';
 import { formatValidationIssues } from '../ui/validation-summary';
 import { renderArrayPanel } from '../visual/array-renderer';
 import { renderVariablesPanel } from '../visual/variable-renderer';
+import { setActiveLessonId } from '../editor/suggestions';
 
 const isLight = localStorage.getItem('theme') === 'light';
 if (isLight) document.documentElement.dataset.theme = 'light';
@@ -27,6 +28,7 @@ export function bootstrap(container: HTMLDivElement | null): void {
 
   const persistedState = loadPersistedAppState();
   const initialLesson = getLessonById(persistedState?.lessonId ?? '') ?? firstLesson;
+  setActiveLessonId(initialLesson.id);
 
   let selectedLesson: LessonDefinition = initialLesson;
   let state = createInitialState(selectedLesson, persistedState?.speed ?? appConfig.initialSpeed);
@@ -55,6 +57,7 @@ export function bootstrap(container: HTMLDivElement | null): void {
 
       stopRunLoop();
       selectedLesson = nextLesson;
+      setActiveLessonId(selectedLesson.id);
       state = createInitialState(selectedLesson, state.speed);
       sourceCode = selectedLesson.starterCode;
       validationMessages = formatValidationIssues(validateSource(sourceCode).errors);
@@ -139,6 +142,68 @@ export function bootstrap(container: HTMLDivElement | null): void {
     persist();
     render();
   });
+
+  layout.code.runCodeButton.addEventListener('click', () => {
+    const code = editor.getValue();
+    const consoleBody = layout.code.console.querySelector('.console-body');
+    if (!consoleBody) return;
+
+    consoleBody.innerHTML = '';
+    
+    // Simple simulation of Java execution
+    const lines = code.split('\n');
+    let hasOutput = false;
+    let hasError = false;
+    
+    lines.forEach((line, index) => {
+      // Very basic syntax check (e.g., missing semicolon)
+      if (line.trim() && !line.trim().endsWith('{') && !line.trim().endsWith('}') && !line.trim().endsWith(';') && !line.includes('class') && !line.includes('public static void main')) {
+         const entry = document.createElement('div');
+         entry.className = 'console-entry error';
+         entry.textContent = `Line ${index + 1}: Syntax error: ';' expected`;
+         consoleBody.appendChild(entry);
+         hasError = true;
+      }
+
+      const match = line.match(/System\.out\.println\s*\((.*)\)\s*;/);
+      if (match && match[1]) {
+        let output = match[1].trim();
+        // Simple string parsing
+        if ((output.startsWith('"') && output.endsWith('"')) || (output.startsWith("'") && output.endsWith("'"))) {
+          output = output.substring(1, output.length - 1);
+        }
+        
+        const entry = document.createElement('div');
+        entry.className = 'console-entry';
+        entry.textContent = output;
+        consoleBody.appendChild(entry);
+        hasOutput = true;
+      }
+    });
+
+    if (!hasOutput && !hasError) {
+      const entry = document.createElement('div');
+      entry.className = 'console-entry';
+      entry.style.opacity = '0.5';
+      entry.textContent = '> Program finished with no output.';
+      consoleBody.appendChild(entry);
+    }
+    
+    consoleBody.scrollTop = consoleBody.scrollHeight;
+  });
+
+  const clearButton = document.createElement('button');
+  clearButton.className = 'mode-toggle';
+  clearButton.style.fontSize = '0.7rem';
+  clearButton.style.padding = '2px 8px';
+  clearButton.style.marginLeft = 'auto';
+  clearButton.textContent = 'Clear';
+  layout.code.console.querySelector('.console-header')?.appendChild(clearButton);
+  
+  clearButton.onclick = () => {
+    const body = layout.code.console.querySelector('.console-body');
+    if (body) body.innerHTML = '';
+  };
 
   layout.code.copyButton.addEventListener('click', async () => {
     try {

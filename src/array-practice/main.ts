@@ -7,7 +7,7 @@ import {
   getMonacoValue, 
   updateMonacoTheme,
   setMonacoReadOnly
-} from './monaco-editor';
+} from './editor';
 import { createLessons } from './lessons';
 import { deepEqual } from './comparison';
 import {
